@@ -85,12 +85,17 @@ public class TestTPCDSRead {
                 footerBlocks.build(),
                 dataSource);
 
-        int batchSize = parquetReader.nextBatch();
-
-        for (PrimitiveColumnIO col : messageColumnIO.getLeaves()) {
-            Block block = parquetReader.readBlock(col.getId(), col.getColumnDescriptor());
-            System.out.println("block size: "+block.getSizeInBytes());
+//        int batchSize = parquetReader.nextBatch();
+       long sumBytes = 0L;
+       long s = System.currentTimeMillis();
+        while (parquetReader.nextBatch()>0) {
+            for (PrimitiveColumnIO col : messageColumnIO.getLeaves()) {
+                Block block = parquetReader.readBlock(col.getId(), col.getColumnDescriptor());
+                sumBytes += block.getSizeInBytes();
+            }
         }
+        System.out.println("sumBytes: "+ sumBytes);
+        System.out.println("time cost(mills): " + (System.currentTimeMillis()-s));
 
     }
 
