@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: io.airlift:event:0.184">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/io/airlift/event/0.184/event-0.184.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/io/airlift/event/0.184/event-0.184-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/io/airlift/event/0.184/event-0.184-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
