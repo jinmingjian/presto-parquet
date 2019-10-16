@@ -161,19 +161,19 @@ public abstract class PrimitiveColumnReader
         return columnDescriptor;
     }
 
-    public ColumnChunk readPrimitive(Field field)
+    public ColumnChunk readPrimitive(Type spiType)
     {
         IntList definitionLevels = new IntArrayList();
         IntList repetitionLevels = new IntArrayList();
         seek();
-//        BlockBuilder blockBuilder = field.getType().createBlockBuilder(null, nextBatchSize);
+        BlockBuilder blockBuilder = spiType.createBlockBuilder(null, nextBatchSize);
         int valueCount = 0;
         while (valueCount < nextBatchSize) {
             if (page == null) {
                 readNextPage();
             }
             int valuesToRead = Math.min(remainingValueCountInPage, nextBatchSize - valueCount);
-            readValues(blockBuilder, valuesToRead, field.getType(), definitionLevels, repetitionLevels);
+            readValues(blockBuilder, valuesToRead, spiType, definitionLevels, repetitionLevels);
             valueCount += valuesToRead;
         }
         checkArgument(valueCount == nextBatchSize, "valueCount %s not equals to batchSize %s", valueCount, nextBatchSize);

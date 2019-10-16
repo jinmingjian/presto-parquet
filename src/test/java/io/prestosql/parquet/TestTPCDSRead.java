@@ -5,6 +5,7 @@ import com.google.common.collect.Streams;
 import io.prestosql.parquet.predicate.Predicate;
 import io.prestosql.parquet.reader.MetadataReader;
 import io.prestosql.parquet.reader.ParquetReader;
+import io.prestosql.spi.block.Block;
 import io.prestosql.spi.predicate.TupleDomain;
 import io.prestosql.spi.type.NamedTypeSignature;
 import io.prestosql.spi.type.RowType;
@@ -42,14 +43,14 @@ public class TestTPCDSRead {
                 "ss_customer_sk",
                 "ss_quantity",
                 "ss_sales_price"};
+//        String[] readFields = {"wp_web_page_sk","wp_url"};
         long split_start = 0;
         long split_length = 13318383053L;
 
-
-
-        ParquetDataSource dataSource = new ParquetDataSource(
-                "/cent_home/data_tpcds/SF100_parquet/store_sales/parquet-1-0.parquet"
-        );
+        //"/cent_home/data_tpcds/SF100_parquet/store_sales/parquet-1-0.parquet"
+        String parFile = "/cent_home/data_tpcds/SF100_parquet/store_sales/parquet-8-0.parquet";
+//        String parFile = "/cent_home/data_tpcds/SF100_parquet/web_page/parquet-8-0.parquet";
+        ParquetDataSource dataSource = new ParquetDataSource(parFile);
         ParquetMetadata parquetMetadata = dataSource.readFooter();
         FileMetaData fileMetaData = parquetMetadata.getFileMetaData();
         MessageType fileSchema = fileMetaData.getSchema();
@@ -87,8 +88,8 @@ public class TestTPCDSRead {
         int batchSize = parquetReader.nextBatch();
 
         for (PrimitiveColumnIO col : messageColumnIO.getLeaves()) {
-            parquetReader.readBlock(col.getId(), col.getColumnDescriptor());
-            System.out.println(batchSize);
+            Block block = parquetReader.readBlock(col.getId(), col.getColumnDescriptor());
+            System.out.println("block size: "+block.getSizeInBytes());
         }
 
     }

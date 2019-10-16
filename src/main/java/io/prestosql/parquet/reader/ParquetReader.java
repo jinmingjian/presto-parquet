@@ -25,9 +25,7 @@ import io.prestosql.spi.block.ArrayBlock;
 import io.prestosql.spi.block.Block;
 import io.prestosql.spi.block.RowBlock;
 import io.prestosql.spi.block.RunLengthEncodedBlock;
-import io.prestosql.spi.type.MapType;
-import io.prestosql.spi.type.Type;
-import io.prestosql.spi.type.TypeSignatureParameter;
+import io.prestosql.spi.type.*;
 import it.unimi.dsi.fastutil.booleans.BooleanArrayList;
 import it.unimi.dsi.fastutil.booleans.BooleanList;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
@@ -38,6 +36,8 @@ import org.apache.parquet.hadoop.metadata.ColumnChunkMetaData;
 import org.apache.parquet.hadoop.metadata.ColumnPath;
 import org.apache.parquet.io.MessageColumnIO;
 import org.apache.parquet.io.PrimitiveColumnIO;
+import org.apache.parquet.schema.DecimalMetadata;
+import org.apache.parquet.schema.PrimitiveType;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -148,7 +148,8 @@ public class ParquetReader
             ParquetColumnChunk columnChunk = new ParquetColumnChunk(descriptor, buffer, 0);
             columnReader.setPageReader(columnChunk.readAllPages());
         }
-        ColumnChunk columnChunk = columnReader.readPrimitive(field);
+        PrimitiveType primitiveType = columnDescriptor.getPrimitiveType();
+        ColumnChunk columnChunk = columnReader.readPrimitive(getSpiType(primitiveType));
 
         // update max size per primitive column chunk
         long bytesPerCell = columnChunk.getBlock().getSizeInBytes() / batchSize;
@@ -159,6 +160,19 @@ public class ParquetReader
             maxBytesPerCell[fieldId] = bytesPerCell;
         }
         return columnChunk;
+    }
+
+    public static final Type getSpiType(PrimitiveType parquetType) {
+        switch (parquetType.getPrimitiveTypeName()) {
+            case INT32:
+                return IntegerType.INTEGER;
+            case INT64:
+                return BigintType.BIGINT;
+            case BINARY:
+                return VarcharType.createUnboundedVarcharType();
+            default://FIXME
+                throw new UnsupportedOperationException("do not support "+parquetType);
+        }
     }
 
     private ColumnChunkMetaData getColumnChunkMetaData(ColumnDescriptor columnDescriptor)
